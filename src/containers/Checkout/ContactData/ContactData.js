@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
 import axios from '../../../axios-orders';
 import * as actions from '../../../store/actions/index';
+import {checkValidity} from '../../../shared/utility';
 class ContactData extends Component {    
     state = {
         orderForm: {
@@ -102,37 +103,10 @@ class ContactData extends Component {
         const order = {
             ingredients: this.props.ingredients,
             price: this.props.price,
-            orderData: formData
+            orderData: formData,
+            userId: this.props.userId
         }
         this.props.onOrderBurger(order, this.props.token);
-    }
-
-    checkValidity(value, rules) {
-        let isValid = false;
-
-        if(rules.required) {
-            isValid = value.trim() !== ''
-        }
-
-        if(rules.minLength) {
-            isValid = isValid && value.length >= rules.minLength
-        }
-
-        if(rules.maxLength) {
-            isValid = isValid && value.length <= rules.maxLength
-        }
-
-        if(rules.isEmail) {
-            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            isValid = isValid && pattern.test(value)
-        }
-
-        if(rules.isNumeric) {
-            const pattern = /^\d+$/;
-            isValid = isValid && pattern.test(value)
-        }
-
-        return isValid;
     }
 
     inputChangedHandler = (event, inputIdentifier) => {
@@ -143,7 +117,7 @@ class ContactData extends Component {
             ...updatedOrderForm[inputIdentifier]
         };
         updateFormElement.value = event.target.value;
-        updateFormElement.valid = this.checkValidity(updateFormElement.value, updateFormElement.validation);
+        updateFormElement.valid = checkValidity(updateFormElement.value, updateFormElement.validation);
         updateFormElement.touched = true;
         updatedOrderForm[inputIdentifier] = updateFormElement;
 
@@ -188,7 +162,8 @@ const mapStateToProps = (state) => {
         ingredients: state.burgerBuilder.ingredients,
         price: state.burgerBuilder.totalPrice,
         loading: state.order.loading,
-        token: state.auth.token
+        token: state.auth.token,
+        userId: state.auth.userId
     };
 };
 
